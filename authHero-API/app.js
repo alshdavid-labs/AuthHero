@@ -1,7 +1,7 @@
 var auth = require('./modules/auth.js'); var auth = auth;
 var express = require('express'); var app = express();
 var bodyParser = require('body-parser'); app.use(bodyParser.json());
-var PORT = 500;
+var PORT = 501;
 
 app.get('/', function(req, res){
       res.status(200).sendFile(__dirname + '/html/login.html');    
