@@ -28,16 +28,60 @@ app.get('/', function(req, res){
 
 app.post('/login', function(req, res)
 {
-    auth.login(req.body)
-    res.status(200).send(req.body)
+    var number1
+    var number2
+
+    var loginPromise = new Promise(
+        function(resolve, reject) {
+            resolve(number1 = promiseTest())
+        }
+
+    );
+
+    loginPromise.then(
+        function(){
+            number2 = promiseAdd(number1)
+            console.log(number2)
+        }
+    );
+    
+    // auth.login(req.body)
+    // res.status(200).send(req.body)
     
 }); 
 
+
+function promiseTest(){
+    return 500;
+}
+
+function promiseAdd(n1){
+    return n1 + 10;
+}
+
+
+
 app.post('/register', function(req, res)
 {    
-    res.status(200).send(returnValue, function(){
-        returnValue = auth.register(req.body)
-    })    
+    var POSTresponse
+    var POSTbody = req.body
+
+    var registerPromise = new Promise(
+        function(resolve, reject) {
+            resolve(POSTresponse = auth.register(POSTbody))
+        }
+    );
+
+    registerPromise.then(
+        function(){
+            console.log(POSTresponse)
+            majorResponseAlert = {
+                'userID': JSON.stringify(POSTresponse._result.rows[0].id)
+            }
+            res.status(200).send(JSON.stringify(majorResponseAlert))
+            console.log(majorResponseAlert)
+        }
+    );
 });   
 
 app.post('/validAuth', function(req, res)
