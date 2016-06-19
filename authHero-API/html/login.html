@@ -12,8 +12,10 @@
 
 
 <script>
+    var domain = 'http://localhost:501/'
+
     $('#login').on('click', function(){ 
-        var url = 'http://127.0.0.1:500/login';
+        var url = domain + 'login';
         var data = {
             username: $('#username').val(),
             password: $('#password').val(),
@@ -22,7 +24,7 @@
     });
 
      $('#register').on('click', function(){ 
-        var url = 'http://127.0.0.1:500/register';
+        var url = domain + 'register';
         var data = {
             username: $('#username').val(),
             password: $('#password').val(),
