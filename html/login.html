@@ -1,0 +1,46 @@
+<script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
+
+<div>
+    <p>Username:</p>
+    <input id="username" type="text" name="name" value="testUser">
+    <p>Password:</p>
+    <input id="password" type="text" value="testPass">
+    </br><br>
+    <button id="login">Login</button>
+    <button id="register">Register</button>
+</div>
+
+
+<script>
+    $('#login').on('click', function(){ 
+        var url = 'http://127.0.0.1:500/login';
+        var data = {
+            username: $('#username').val(),
+            password: $('#password').val(),
+        };
+        login(data, url);        
+    });
+
+     $('#register').on('click', function(){ 
+        var url = 'http://127.0.0.1:500/register';
+        var data = {
+            username: $('#username').val(),
+            password: $('#password').val(),
+        };
+        login(data, url);        
+    });
+
+    function login(data, url){
+        $.ajax({		
+            type: 'POST',
+            url: url,        
+            crossDomain: true,
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: "application/json",
+            success: function() {console.log(data);},
+            error: function(data) {console.log(data);}        
+        });
+    
+    }
+</script>
