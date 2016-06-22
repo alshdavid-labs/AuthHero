@@ -1,24 +1,16 @@
-var auth = require('./modules/auth.js'); 
+var uuid = require('node-uuid');
+var pg = require('pg');
+var conString = "postgres://postgres:password@localhost:5432/authhero";
+var client = new pg.Client(conString); client.connect();
 var express = require('express'); var app = express();
 var bodyParser = require('body-parser'); app.use(bodyParser.json());
 var PORT = 501;
 
 app.use(function (req, res, next) {
-
-    // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:*');
-
-    // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
-
-    // Pass to next layer of middleware
     next();
 });
 
@@ -28,25 +20,40 @@ app.get('/', function(req, res){
 
 app.post('/login', function(req, res)
 {
+    var POSTbody = req.body
     var number1
     var number2
 
-    var loginPromise = new Promise(
-        function(resolve, reject) {
-            resolve(number1 = promiseTest())
-        }
+    function dbCall(data, funUnique){
+        client.query("select distinct on (username) username from useraccounts", function(err, result){
 
-    );
+            var DBitem = result.rows
+            var DATAusername = JSON.stringify(data.username)
+            
+            var userNamePackage = result.rows
+            for (i = 0; i < userNamePackage.length; i++){
+                DBitem = JSON.stringify(userNamePackage[i].username);
 
-    loginPromise.then(
-        function(){
-            number2 = promiseAdd(number1)
-            console.log(number2)
-        }
-    );
+                if (DATAusername === DBitem){
+                    isUnique = false
+                    break                    
+                } else {isUnique = true}
+            }
+            
+            funUnique(data, isUnique)
+        });
+    };
+
+    function funTime(postShit, isUni){
+        console.log(isUni)
+        res.status(200).send(postShit)
+        
+    }
+
     
+    
+    dbCall(POSTbody, funTime);
     // auth.login(req.body)
-    // res.status(200).send(req.body)
     
 }); 
 
