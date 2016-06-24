@@ -7,7 +7,8 @@ var express = require('express'); var app = express();
 var bodyParser = require('body-parser'); app.use(bodyParser.json());
 var PORT = 501;
 
-
+//To create the DB
+// sudo -u postgres psql postgres
 // \password postgres
 //CREATE DATABASE authhero;
 //CREATE SCHEMA authhero;
