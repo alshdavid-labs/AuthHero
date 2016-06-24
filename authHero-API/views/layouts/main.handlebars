@@ -1,0 +1,64 @@
+<script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
+
+<div>
+    <p>Username:</p>
+    <input id="username" type="text" name="name" value="User">
+    <p>Password:</p>
+    <input id="password" type="text" value="Password">
+    </br><br>
+    <button id="login">Login</button>
+    <button id="register">Register</button>
+</div>
+<br>
+<br>
+<div>
+    <p>Auth Token Checker:</p>
+    <input id="token" type="text" name="token">
+    <br><br>
+    <button id="checktoken">Check Auth</button>
+</div>
+
+
+<script>
+    var domain = '{{{ url }}}'
+    console.log('{{{ url }}}')
+
+    $('#login').on('click', function(){ 
+        var url = domain + 'login';
+        var data = {
+            username: $('#username').val(),
+            password: $('#password').val(),
+        };
+        request(data, url);        
+    });
+
+     $('#register').on('click', function(){ 
+        var url = domain + 'register';
+        var data = {
+            username: $('#username').val(),
+            password: $('#password').val(),
+        };
+        request(data, url);        
+    });
+    $('#checktoken').on('click', function(){ 
+        var url = domain + 'checkauth';
+        var data = {
+            auth: $('#token').val()
+        };
+        request(data, url);        
+    });
+
+    function request(data, url){
+        $.ajax({		
+            type: 'POST',
+            url: url,        
+            crossDomain: true,
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: "application/json",
+            success: function() {console.log(data);},
+            error: function(data) {console.log(data);}        
+        });
+    
+    }
+</script>

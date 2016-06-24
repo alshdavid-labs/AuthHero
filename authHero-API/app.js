@@ -1,12 +1,21 @@
+//set the first cmd argument as the IP or URL of the server
+// eg. node app.js http://localhost:501/
+
 var uuid = require('node-uuid');
 var schedule = require('node-schedule');
 var pg = require('pg');
 var conString = "postgres://postgres:password@localhost:5432/authhero";
 var client = new pg.Client(conString); client.connect();
-var express = require('express'); var app = express();
+var express = require('express'); 
+var app = express();
+var exphbs  = require('express-handlebars');
+app.engine('handlebars', 
+            exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
 var bodyParser = require('body-parser'); app.use(bodyParser.json());
 var PORT = 501;
-
+var URL = process.argv[2]
 //To create the DB
 // sudo -u postgres psql postgres
 // \password postgres
@@ -26,7 +35,7 @@ app.use(function (req, res, next) {
 });
 
 app.get('/', function(req, res){
-      res.status(200).sendFile(__dirname + '/html/login.html');    
+    res.render('main', { url : URL})
 });
 
 app.post('/login', function(req, res)
