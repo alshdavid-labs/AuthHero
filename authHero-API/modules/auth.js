@@ -8,6 +8,7 @@ client.connect();
 
 // \password postgres
 //CREATE DATABASE authhero;
+// -- or \c authhero
 //CREATE SCHEMA authhero;
 // \c authhero
 //CREATE TABLE useraccounts (ID SERIAL PRIMARY KEY, username VARCHAR(30), password VARCHAR(30));
