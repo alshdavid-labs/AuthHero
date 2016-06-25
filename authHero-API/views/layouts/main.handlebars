@@ -165,6 +165,37 @@
 </script>
 
 <!--------------------------------->
+<!-- My Userd ---->
+
+<div>
+    <p><u>Admin My Users:</u></p>
+    <p>Project UUID:</p>
+    <input id="myUsersUUID" type="text" value="">
+    <p>Authtoken:</p>
+    <input id="myUsersAuth" type="text" value="">
+    </br><br>
+    <button id="findMyUsers">Find Projects</button>
+</div>
+<br>
+<hr>
+
+
+<script>
+    var domain = '{{{ url }}}'
+    console.log('{{{ url }}}')
+    
+
+    $('#findMyUsers').on('click', function(){ 
+        var url = domain + 'api/myusers';
+        var data = {
+            UUID: $('#myUsersUUID').val(),
+            auth: $('#myUsersAuth').val()
+        };
+        request(data, url);        
+    });
+
+</script>
+
 
 <script>    
     function request(data, url){

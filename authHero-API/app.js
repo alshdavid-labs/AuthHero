@@ -346,7 +346,6 @@ app.post('/api/myprojects', function(req, res){
             var userID = result.rows[0].userid
             client.query("select * from permissions where admin=$1;", [userID], function(err, result){
                 
-                var lol 
                 var results = result.rows 
                 for (i = 0; i < results.length; i++) { 
                     client.query("select * from projects where id=$1;", [results[i].project], function(err, result){
@@ -380,9 +379,50 @@ app.post('/api/myprojects', function(req, res){
 
 }); 
 
-app.post('/api/myusers/:projectname', function(req, res){
-    var POSTbody = req.body
-    var projectName = req.params.projectname
+app.post('/api/myusers', function(req, res){
+    var POSTbody = req.body;
+
+    //is the auth token valid?
+    function checkAuth(data, permissionChecker, responder){      
+        client.query("SELECT * FROM authtokens WHERE auth=$1", [data.auth], function(err, result){
+            if (result.rowCount === 0) { 
+                response = {'message' : 'invalid token'}
+                var status = "500"
+                responder(status, response)  
+            } else {     
+                var userID = result.rows[0].userid
+                client.query("UPDATE authtokens SET expire=$1 WHERE userid=$2", [30, userID], function(err, result){});        
+                permissionChecker(data, userID, responder)                        
+            }
+        });        
+    };
+
+    //does that admin have permission on that project?
+    function permissionChecker(data, userID, responder){
+        client.query("select * from permissions where admin=$1;", [userID], function(err, result){
+            if (result.rowCount === 0) { 
+                response = {'message' : 'you do not have permision'}
+                var status = "500"
+                responder(status, response)  
+            } else {     
+                client.query("select * from projects where uuid=$1;", [data.UUID], function(err, result){
+                    client.query("select uuid,username,tags from useraccounts where project=$1;", [result.rows[0].id], function(err, result){
+                        responder(200, result.rows)
+                    }); 
+                });                      
+            }
+        });
+    }
+
+    function responder(status, response){
+        res.status(status).send(response)
+    }
+
+    checkAuth(POSTbody, permissionChecker, responder)
+
+
+    
+    //fetch all users for that project SELECT * FROM useraccounts WHERE project='projectID' 
 });
 
 app.post('/api/useauth', function(req, res)
