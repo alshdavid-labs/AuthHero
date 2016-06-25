@@ -12,4 +12,4 @@
 #
 
 echo "Starting authHero -- api.authhero.com"
-screen -A -d -m -S authHero node app.js http://128.199.247.60:501/
+screen -A -d -m -S authHero node app.js http://128.199.247.60 501
