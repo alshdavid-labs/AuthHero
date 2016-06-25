@@ -1,11 +1,14 @@
-//set the first cmd argument as the IP or URL of the server
-// eg. node app.js http://localhost:501/
+// Useage node app.js URL PORT
+// eg. node app.js http://localhost.com 501
 
+//---IMPORTS----
 var uuid = require('node-uuid');
 var schedule = require('node-schedule');
+//Database Setup
 var pg = require('pg');
 var conString = "postgres://postgres:password@localhost:5432/authhero";
 var client = new pg.Client(conString); client.connect();
+//Express Setup
 var express = require('express'); 
 var app = express();
 var exphbs  = require('express-handlebars');
@@ -14,9 +17,14 @@ app.engine('handlebars',
 app.set('view engine', 'handlebars');
 
 var bodyParser = require('body-parser'); app.use(bodyParser.json());
-var PORT = 501;
-var URL = process.argv[2]
-//To create the DB
+if (process.argv[3]){var PORT = process.argv[3];} else {var PORT = 501}
+if (process.argv[2]){var URL = process.argv[2];} else {var URL = 'http://localhost'}
+serviceLocation = String(URL) + ':' + String(PORT) + '/' ;
+
+//--------------
+
+//---DB-Setup---
+//
 // sudo -u postgres psql postgres
 // \password postgres
 //CREATE DATABASE authhero;
@@ -25,6 +33,7 @@ var URL = process.argv[2]
 //CREATE TABLE useraccounts (ID SERIAL PRIMARY KEY, UID VARCHAR(40), username VARCHAR(30), password VARCHAR(30));
 //CREATE TABLE authtokens (ID SERIAL PRIMARY KEY, userID INT, auth VARCHAR(40), expire INT);
 //SELECT * FROM useraccounts;
+//-------------
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -34,10 +43,13 @@ app.use(function (req, res, next) {
     next();
 });
 
+//Serve basic page to test endpoints
 app.get('/', function(req, res){
-    res.render('main', { url : URL})
+    //pass the URL entered as the CMD argument
+    res.render('main', { url : serviceLocation})
 });
 
+//Login endpoint
 app.post('/login', function(req, res)
 {
     var POSTbody = req.body
@@ -129,18 +141,18 @@ app.post('/register', function(req, res)
     checkAccount(POSTbody, createAccount, responder);
 });   
 
-app.post('/checkauth', function(req, res)
+app.post('/useauth', function(req, res)
 {
     var POSTbody = req.body
     function checkAuth(data, responder){      
         client.query("SELECT * FROM authtokens WHERE auth=$1", [data.auth], function(err, result){
             if (result.rowCount === 0) { 
-                console.log("no token")
                 response = {'message' : 'invalid token'}
                 var status = "500"
                 responder(status, response)  
-            } else {    
-                console.log("token")          
+            } else {     
+                var userID = result.rows[0].userid
+                client.query("UPDATE authtokens SET expire=$1 WHERE userid=$2", [30, userID], function(err, result){});        
                 response = {'message' : 'valid token'}
                 var status = "200"
                 responder(status, response)                          
@@ -155,6 +167,7 @@ app.post('/checkauth', function(req, res)
     checkAuth(POSTbody, responder)
 }); 
 
+//go through database at midnight and remove auth tokens that have expired
 var chronos_the_father_of_time = schedule.scheduleJob({hour: 00, minute: 00}, function(){
     scythe();
 });
@@ -176,7 +189,7 @@ function scythe(){
 
 var serve = function(){
     app.listen(PORT);
-    console.log('on port: ' + PORT);
+    console.log('serving @ ' + serviceLocation);
 }
 
 serve();
