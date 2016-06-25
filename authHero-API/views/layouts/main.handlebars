@@ -3,6 +3,51 @@
 
 <!-- Admin Login /  Registration -->
 <div>
+    <a href="#gui"><div style="position: fixed; top: 10px; right: 10px; background-color:white"><u>API GUI \/</u></div></a>
+    <div>
+        <div style="font-size:30px"><u>authHero:</u></div><br>
+        This is a user account managment RESTful API, designed to make it easier for developers to quickly 
+        put together a service and not worry about authentication, user managment, logging or statistics generation.
+        <br><br>
+        Basic usage of this API is, you create an admin account, use that admin account to create a "project",
+        you then sign users up using that project's endpoint.
+        <br><br>
+        user account names must be unique to the project, project names are unique.
+        <br><br>
+        The basic idea is this service generates an auth token on login, which you use in lue of sending/storing plaintext passwords.<br>
+        Auth tokens are checked against on every action to ensure the action is permitted<br>
+        You do this by sending a request to authHero on the '/useauth' endpoint, and it tells you if that token is valid.<br>
+        You must accociate the account with the token on your end.
+        <br><br><hr><br>
+        <u>Admin Endpoints:</u><br>
+        <br>
+        login - /login<br>
+        <i>JSON - {username:username, password:password}</i><br><br>
+        registration - /registration<br>
+        <i>JSON - {username:username, password:password, tags:'optional'}</i><br><br>
+        create project - /createproject<br>
+        <i>JSON - {projectname:'projectname', auth:'auth-token', tags:'optional'}</i><br><br>
+        <br>
+        check your projects - /myprojects<br>
+        <i>JSON - {auth:'auth-token'}</i><br><br>
+        check users of your project - /myusers<br>
+        <i>JSON - {auth:'auth-token', UUID:'UUID of project'}</i><br><br>
+        <br><br>
+        <u>User Endpoints:</u><br>
+        <br>
+        login - /[projectname]/login<br>
+        <i>JSON - {username:username, password:password}</i><br><br>
+        register - /[projectname]/register<br>
+        <i>JSON - {username:username, password:password, tags:'optional'}</i><br><br>
+        <br>
+        <br>
+        <u>General Endpoints:</u><br>
+        <br>
+        use auth-token - /useauth<br>
+        <i>JSON - {auth:'auth-token'}</i><br><br><br><br>
+    </div>
+    <hr>
+    <div id="gui" style="font-size:30px; margin: 30px 0px 30px 0px;">Basic Interface for API</div>
     <hr>
     <p><u>Auth Token Checker:</u></p>
     <input id="adminToken" type="text" name="token">
