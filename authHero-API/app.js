@@ -31,7 +31,8 @@ serviceLocation = String(URL) + ':' + String(PORT) + '/' ;
 //CREATE DATABASE authhero;
 //CREATE SCHEMA authhero;
 // \c authhero
-//CREATE TABLE projects (ID SERIAL PRIMARY KEY, UUID VARCHAR(40), projectname VARCHAR(100), admins TEXT, tags VARCHAR(1000));
+//CREATE TABLE projects (ID SERIAL PRIMARY KEY, UUID VARCHAR(40), projectname VARCHAR(100), tags VARCHAR(1000));
+//CREATE TABLE permissions (ID SERIAL PRIMARY KEY, admin INT, project INT);
 //CREATE TABLE useraccounts (ID SERIAL PRIMARY KEY, UUID VARCHAR(40), username VARCHAR(100), password VARCHAR(30), project INT, type VARCHAR(20), tags VARCHAR(1000));
 //INSERT INTO useraccounts(uuid, username, password, type, tags) VALUES ('d5009d0a-3a88-11e6-ac61-9e71128cae77', 'root', 'password', 'root', 'root account over all projects');
 //CREATE TABLE authtokens (ID SERIAL PRIMARY KEY, userID INT, auth VARCHAR(40), expire INT);
@@ -308,9 +309,11 @@ app.post('/api/createproject', function(req, res)
     }
 
     function createProject(data, userID, responder){
-        pg.connect(conString, function(err, client, done){  
-            admins = userID + ', 1'
-            client.query("insert into projects(uuid, projectname, admins, tags) values ($1, $2, $3, $4) returning uuid;", [uuid.v4(), data.projectname, admins, data.tags], function(err, result){
+        pg.connect(conString, function(err, client, done){
+            client.query("insert into projects(uuid, projectname, tags) values ($1, $2, $3) returning *;", [uuid.v4(), data.projectname, data.tags], function(err, result){
+                client.query("insert into permissions(admin, project) values ($1, $2);", [userID, result.rows[0].id], function(err, result){})
+                client.query("insert into permissions(admin, project) values ($1, $2);", [1, result.rows[0].id], function(err, result){})
+                console.log(result.rows[0])
                 var DBresponse = result.rows[0].uuid;
                 var response = {
                     'message' : 'project created',
@@ -332,7 +335,7 @@ app.post('/api/createproject', function(req, res)
 
 app.post('/api/myprojects', function(req, res){
      var POSTbody = req.body
-     console.log(POSTbody)
+     var projects = []
 
      client.query("SELECT * FROM authtokens WHERE auth=$1", [POSTbody.auth], function(err, result){
         if (result.rowCount === 0) { 
@@ -341,14 +344,39 @@ app.post('/api/myprojects', function(req, res){
             res.status(status).send(response) 
         } else {     
             var userID = result.rows[0].userid
-            client.query("SELECT * FROM projects", function(err, result){
-                var results = result.rows[1].admins;
-                console.log(results)
-                res.status(200).send('ok')
+            client.query("select * from permissions where admin=$1;", [userID], function(err, result){
+                
+                var lol 
+                var results = result.rows 
+                for (i = 0; i < results.length; i++) { 
+                    client.query("select * from projects where id=$1;", [results[i].project], function(err, result){
+                        tempProject = {
+                            'UUID' : result.rows[0].uuid,
+                            'projectname' : result.rows[0].projectname,
+                            'tags' : result.rows[0].tags
+                        }
+
+                        projects.push(tempProject)
+                        
+
+                        if (projects.length === results.length){
+                            projectData(projects);
+                        }
+
+                    }); 
+                    
+                   
+                }
+                
+                //res.status(200).send('ok')
             });        
                                  
         }
     });
+
+    function projectData(data){
+        res.status(200).send(data)
+    }
 
 }); 
 
