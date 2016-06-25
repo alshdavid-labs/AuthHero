@@ -6,8 +6,8 @@
     <a href="#gui"><div style="position: fixed; top: 10px; right: 10px; background-color:white"><u>API GUI \/</u></div></a>
     <div>
         <div style="font-size:30px"><u>authHero:</u></div><br>
-        This is a user account managment RESTful API, designed to make it easier for developers to quickly 
-        put together a service and not worry about authentication, user managment, logging or statistics generation.
+        This is a user account management RESTful API, designed to make it easier for developers to quickly 
+        put together a service and not worry about authentication, user management, logging or statistics generation.
         <br><br>
         Basic usage of this API is, you create an admin account, use that admin account to create a "project",
         you then sign users up using that project's endpoint.
@@ -16,8 +16,8 @@
         <br><br>
         The basic idea is this service generates an auth token on login, which you use in lue of sending/storing plaintext passwords.<br>
         Auth tokens are checked against on every action to ensure the action is permitted<br>
-        You do this by sending a request to authHero on the '/useauth' endpoint, and it tells you if that token is valid.<br>
-        You must accociate the account with the token on your end.
+        You do this by sending a request to authHero on the '/useauth' endpoint, and it tells you if that token is valid.<br><br>
+        responses will be in your network inspector - protip: cnt+i
         <br><br><hr><br>
         <u>Admin Endpoints:</u><br>
         <br>
