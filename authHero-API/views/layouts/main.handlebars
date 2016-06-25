@@ -1,53 +1,141 @@
 <script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
 
+
+<!-- Admin Login /  Registration -->
 <div>
-    <p>Username:</p>
-    <input id="username" type="text" name="name" value="User">
-    <p>Password:</p>
-    <input id="password" type="text" value="Password">
-    </br><br>
-    <button id="login">Login</button>
-    <button id="register">Register</button>
-</div>
-<br>
-<br>
-<div>
-    <p>Auth Token Checker:</p>
-    <input id="token" type="text" name="token">
+    <hr>
+    <p><u>Auth Token Checker:</u></p>
+    <input id="adminToken" type="text" name="token">
     <br><br>
-    <button id="checktoken">Check Auth</button>
+    <button id="adminChecktoken">Check Auth</button>
+    <br><br>
 </div>
+
+<div>
+    <hr>
+    <p><u>Admin Login/Registration:</u></p>
+    <p>Username:</p>
+    <input id="adminUsername" type="text" name="name" value="User">
+    <p>Password:</p>
+    <input id="adminPassword" type="text" value="Password">
+    </br><br>
+    <button id="adminLogin">Login</button>
+    <button id="adminRegister">Register</button>
+</div>
+<br>
+<hr>
 
 
 <script>
     var domain = '{{{ url }}}'
     console.log('{{{ url }}}')
 
-    $('#login').on('click', function(){ 
-        var url = domain + 'login';
+    $('#adminLogin').on('click', function(){ 
+        var url = domain + 'api/login';
         var data = {
-            username: $('#username').val(),
-            password: $('#password').val(),
+            username: $('#adminUsername').val(),
+            password: $('#adminPassword').val(),
         };
         request(data, url);        
     });
 
-     $('#register').on('click', function(){ 
-        var url = domain + 'register';
+     $('#adminRegister').on('click', function(){ 
+        var url = domain + 'api/register';
         var data = {
-            username: $('#username').val(),
-            password: $('#password').val(),
+            username: $('#adminUsername').val(),
+            password: $('#adminPassword').val(),
+            tags: ""
         };
         request(data, url);        
     });
-    $('#checktoken').on('click', function(){ 
-        var url = domain + 'useauth';
+    $('#adminChecktoken').on('click', function(){ 
+        var url = domain + 'api/useauth';
         var data = {
-            auth: $('#token').val()
+            auth: $('#adminToken').val()
+        };
+        request(data, url);        
+    });
+</script>
+
+<!--------------------------------->
+<!----- Admin Create Project ------>
+
+<div>
+    <p><u>Admin Create Project:</u></p>
+    <p>Project Name:</p>
+    <input id="projectName" type="text" name="name" value="ProjectName">
+    </br>
+    <p>Auth Token:</p>
+    <input id="projectAdminToken" type="text" name="token">
+    <br><br>
+    <button id="projectCreate">Create Project</button>
+    <br><br>
+    <hr>
+</div>  
+
+
+<script>
+    var domain = '{{{ url }}}'
+    console.log('{{{ url }}}')
+
+    $('#projectCreate').on('click', function(){ 
+        var url = domain + 'api/createproject';
+        var data = {
+            projectname: $('#projectName').val(),
+            auth: $('#projectAdminToken').val()
+        };
+        request(data, url);        
+    });
+</script>
+
+<!--------------------------------->
+<!-- User Registration / Login ---->
+
+<div>
+    <p><u>User Login/Registration:</u></p>
+    <p>Project Name:</p>
+    <input id="userProjectname" type="text" name="name" value="ProjectName">
+    <p>Username:</p>
+    <input id="userUsername" type="text" name="name" value="User">
+    <p>Password:</p>
+    <input id="userPassword" type="text" value="Password">
+    </br><br>
+    <button id="userLogin">Login</button>
+    <button id="userRegister">Register</button>
+</div>
+<br>
+<hr>
+
+
+<script>
+    var domain = '{{{ url }}}'
+    console.log('{{{ url }}}')
+    
+
+    $('#userLogin').on('click', function(){ 
+        var projectname = $('#userProjectname').val()
+        var url = domain + 'api/' + projectname + '/login';
+        var data = {
+            username: $('#userUsername').val(),
+            password: $('#userPassword').val(),
         };
         request(data, url);        
     });
 
+     $('#userRegister').on('click', function(){ 
+        var projectname = $('#userProjectname').val()
+        var url = domain + 'api/' + projectname + '/register';
+        var data = {
+            username: $('#userUsername').val(),
+            password: $('#userPassword').val(),
+            tags: ""
+        };
+        request(data, url);        
+    });
+</script>
+
+
+<script>    
     function request(data, url){
         $.ajax({		
             type: 'POST',

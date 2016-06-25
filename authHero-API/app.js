@@ -27,10 +27,13 @@ serviceLocation = String(URL) + ':' + String(PORT) + '/' ;
 //
 // sudo -u postgres psql postgres
 // \password postgres
+//   -- set the password to 'password'
 //CREATE DATABASE authhero;
 //CREATE SCHEMA authhero;
 // \c authhero
-//CREATE TABLE useraccounts (ID SERIAL PRIMARY KEY, UID VARCHAR(40), username VARCHAR(30), password VARCHAR(30));
+//CREATE TABLE projects (ID SERIAL PRIMARY KEY, UUID VARCHAR(40), projectname VARCHAR(100), admins TEXT, tags VARCHAR(1000));
+//CREATE TABLE useraccounts (ID SERIAL PRIMARY KEY, UUID VARCHAR(40), username VARCHAR(100), password VARCHAR(30), project INT, type VARCHAR(20), tags VARCHAR(1000));
+//INSERT INTO useraccounts(uuid, username, password, type, tags) VALUES ('d5009d0a-3a88-11e6-ac61-9e71128cae77', 'root', 'password', 'root', 'root account over all projects');
 //CREATE TABLE authtokens (ID SERIAL PRIMARY KEY, userID INT, auth VARCHAR(40), expire INT);
 //SELECT * FROM useraccounts;
 //-------------
@@ -49,12 +52,137 @@ app.get('/', function(req, res){
     res.render('main', { url : serviceLocation})
 });
 
-//Login endpoint
-app.post('/login', function(req, res)
+
+app.post('/api/:projectname/login', function(req, res){
+    var POSTbody = req.body
+    var projectName = req.params.projectname
+
+    function loginUser(data, projectName, passwordTester, responder){
+        
+        if (projectName.length > 0){
+            client.query("select * from projects where projectname=$1", [projectName], function(err, result){
+                if (result.rowCount === 0) { 
+                    //project doesn't exsist               
+                    response = {'message' : 'project does not exsist'}
+                    var status = "500"
+                    responder(status, response)
+                } else {
+                    var project = {'id' : result.rows[0].id, 'uuid' : result.rows[0].uuid}
+                   client.query("select * from useraccounts where project=$1 and username=$2", [project.id, data.username], function(err, result){
+                        if (result.rowCount === 0) { 
+                            response = {'message' : 'account does not exsist'}
+                            var status = "500"
+                            responder(status, response)
+                        } else {
+                            //Login
+                            var account = result.rows[0]               
+                            passwordTester(data, account, responder)                            
+                        }
+                    });                           
+                }
+            });
+
+            
+        } else { 
+            response = {'message' : 'invalid project details'}; 
+            responder('500', response)
+        } 
+    };
+    
+    function passwordTester(data, DBdata, responder){
+        if (data.password === DBdata.password){
+            //correct password
+            var authToken = uuid.v4()
+             pg.connect(conString, function(err, client, done){        
+                client.query("insert into authtokens(userid, auth, expire) values ($1, $2, $3)", [DBdata.id, authToken, 30], function(err, result){})
+             });
+            response = {
+                'message' : 'logged in',
+                'ID' : String(DBdata.uuid),    
+                'X-AUTH-TOKEN' : authToken
+            }                
+            responder('200', response)
+        } else {
+            //incorrect password
+            response = {'message' : 'incorrect password'}                
+            responder('500', response)
+
+        }
+        
+    }
+
+    function responder(status, response){
+        res.status(status).send(response)
+    }
+    
+    loginUser(POSTbody, projectName, passwordTester, responder);   
+});
+
+app.post('/api/:projectname/register', function(req, res){
+    var POSTbody = req.body
+    var projectName = req.params.projectname
+
+    function checkAccount(data, projectName, createAccount, responder){
+        
+        if (projectName.length > 0){
+            client.query("select * from projects where projectname=$1", [projectName], function(err, result){
+                if (result.rowCount === 0) { 
+                    //name already taken               
+                    response = {'message' : 'project does not exsist'}
+                    var status = "500"
+                    responder(status, response)
+                } else {
+                    var project = {'id' : result.rows[0].id, 'uuid' : result.rows[0].uuid}
+                   client.query("select * from useraccounts where project=$1 and username=$2", [project.id, data.username], function(err, result){
+                        if (result.rowCount === 0) { 
+                            //name is unique, create account
+                            createAccount(data, project, responder)
+                        } else {
+                            //name already taken               
+                            response = {'message' : 'username already taken'}
+                            var status = "500"
+                            responder(status, response)                          
+                        }
+                    });                           
+                }
+            });
+
+            
+        } else { 
+            response = {'message' : 'invalid project details'}; 
+            responder('500', response)
+        } 
+    };
+
+    function createAccount(data, project, responder){
+        pg.connect(conString, function(err, client, done){        
+            client.query("insert into useraccounts(uuid, username, password, project, type, tags) values ($1, $2, $3, $4, $5, $6) returning uuid;", [uuid.v4(), data.username, data.password, project.id, 'user', data.tags], function(err, result){
+                var DBresponse = result.rows[0].uuid;
+                var response = {
+                    'Message' : 'user created',
+                    'User-ID' : String(DBresponse),
+                    'Project-ID' : project.uuid
+                }
+                var status = "200"
+                responder(status, response)
+            })
+        });
+    }    
+
+    function responder(status, response){
+        res.status(status).send(response)
+    }
+    
+    checkAccount(POSTbody, projectName, createAccount, responder);
+});
+
+//Admin login endpoint
+app.post('/api/login', function(req, res)
 {
     var POSTbody = req.body
 
     function loginUser(data, passwordTester, responder){
+
         client.query("SELECT * FROM useraccounts WHERE username=$1", [data.username], function(err, result){
             if (result.rowCount === 0) {
                 response = {'message':'account does not exsist'}
@@ -71,10 +199,10 @@ app.post('/login', function(req, res)
             var authToken = uuid.v4()
              pg.connect(conString, function(err, client, done){        
                 client.query("insert into authtokens(userid, auth, expire) values ($1, $2, $3)", [DBdata.id, authToken, 30], function(err, result){})
-            });
+             });
             response = {
                 'message' : 'logged in',
-                'ID' : String(DBdata.uid),    
+                'ID' : String(DBdata.uuid),    
                 'X-AUTH-TOKEN' : authToken
             }                
             responder('200', response)
@@ -84,7 +212,6 @@ app.post('/login', function(req, res)
             responder('500', response)
 
         }
-        console.log(data)
         
     }
 
@@ -97,7 +224,7 @@ app.post('/login', function(req, res)
 
 
 
-app.post('/register', function(req, res)
+app.post('/api/register', function(req, res)
 {    
     var POSTbody = req.body
 
@@ -122,8 +249,8 @@ app.post('/register', function(req, res)
 
     function createAccount(data, responder){
         pg.connect(conString, function(err, client, done){        
-            client.query("insert into useraccounts(uid, username, password) values ($1, $2, $3) returning uid;", [uuid.v4(), data.username, data.password], function(err, result){
-                var DBresponse = result.rows[0].uid;
+            client.query("insert into useraccounts(uuid, username, password, type, tags) values ($1, $2, $3, $4, $5) returning uuid;", [uuid.v4(), data.username, data.password, 'admin', data.tags], function(err, result){
+                var DBresponse = result.rows[0].uuid;
                 var response = {
                     'message' : 'user created',
                     'ID' : String(DBresponse)
@@ -141,7 +268,69 @@ app.post('/register', function(req, res)
     checkAccount(POSTbody, createAccount, responder);
 });   
 
-app.post('/useauth', function(req, res)
+
+app.post('/api/createproject', function(req, res)
+{    
+    var POSTbody = req.body
+
+    function checkAuth(data, checkProject, createProject, responder){
+        client.query("SELECT * FROM authtokens WHERE auth=$1", [data.auth], function(err, result){
+            if (result.rowCount === 0) { 
+                response = {'message' : 'Can not create a project, is a user account'}
+                var status = "500"
+                responder(status, response)  
+            } else {     
+                var userID = result.rows[0].userid
+                client.query("SELECT * FROM useraccounts WHERE id=$1", [userID], function(err, result){
+                    if (result.rows[0].type === 'admin'){
+                        client.query("UPDATE authtokens SET expire=$1 WHERE userid=$2", [30, userID], function(err, result){});        
+                        checkProject(data, userID, createProject, responder)
+                    } else {
+                        response = {'message' : 'invalid account type'}
+                        var status = "500"
+                        responder(status, response)  
+                    }
+                })
+            }
+        });
+    }
+
+    function checkProject(data, userID, createProject, responder){
+        client.query("SELECT * FROM projects WHERE projectname=$1", [data.projectname], function(err, result){
+            if (!result.rowCount === 0) { 
+                response = {'message' : 'Project name taken'}
+                var status = "500"
+                responder(status, response)  
+            } else {       
+                createProject(data, userID, responder)                          
+            }
+        });
+    }
+
+    function createProject(data, userID, responder){
+        pg.connect(conString, function(err, client, done){  
+            admins = [userID, 1]
+            client.query("insert into projects(uuid, projectname, admins, tags) values ($1, $2, $3, $4) returning uuid;", [uuid.v4(), data.projectname, admins, data.tags], function(err, result){
+                var DBresponse = result.rows[0].uuid;
+                var response = {
+                    'message' : 'project created',
+                    'projectname' : data.projectname,
+                    'ID' : String(DBresponse)
+                }
+                var status = "200"
+                responder(status, response)
+            })
+        });
+    }
+
+    function responder(status, response){
+        res.status(status).send(response)
+    }
+    
+    checkAuth(POSTbody, checkProject, createProject, responder);
+});   
+
+app.post('/api/useauth', function(req, res)
 {
     var POSTbody = req.body
     function checkAuth(data, responder){      
@@ -166,6 +355,9 @@ app.post('/useauth', function(req, res)
 
     checkAuth(POSTbody, responder)
 }); 
+
+
+
 
 //go through database at midnight and remove auth tokens that have expired
 var chronos_the_father_of_time = schedule.scheduleJob({hour: 00, minute: 00}, function(){
