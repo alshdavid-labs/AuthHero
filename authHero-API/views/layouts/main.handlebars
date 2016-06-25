@@ -134,6 +134,37 @@
     });
 </script>
 
+<!--------------------------------->
+<!-- My Projects ---->
+
+<div>
+    <p><u>Admin MyProjects:</u></p>
+    <p>Authtoken:</p>
+    <input id="myProjectAuth" type="text" value="">
+    </br><br>
+    <button id="findMyProjects">Find Projects</button>
+</div>
+<br>
+<hr>
+
+
+<script>
+    var domain = '{{{ url }}}'
+    console.log('{{{ url }}}')
+    
+
+    $('#findMyProjects').on('click', function(){ 
+        var projectname = $('#myProjectAuth').val()
+        var url = domain + 'api/myprojects';
+        var data = {
+            auth: $('#myProjectAuth').val()
+        };
+        request(data, url);        
+    });
+
+</script>
+
+<!--------------------------------->
 
 <script>    
     function request(data, url){

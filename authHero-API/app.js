@@ -276,7 +276,7 @@ app.post('/api/createproject', function(req, res)
     function checkAuth(data, checkProject, createProject, responder){
         client.query("SELECT * FROM authtokens WHERE auth=$1", [data.auth], function(err, result){
             if (result.rowCount === 0) { 
-                response = {'message' : 'Can not create a project, is a user account'}
+                response = {'message' : 'authtoken invalid'}
                 var status = "500"
                 responder(status, response)  
             } else {     
@@ -297,7 +297,7 @@ app.post('/api/createproject', function(req, res)
 
     function checkProject(data, userID, createProject, responder){
         client.query("SELECT * FROM projects WHERE projectname=$1", [data.projectname], function(err, result){
-            if (!result.rowCount === 0) { 
+            if (result.rowCount > 0) { 
                 response = {'message' : 'Project name taken'}
                 var status = "500"
                 responder(status, response)  
@@ -309,7 +309,7 @@ app.post('/api/createproject', function(req, res)
 
     function createProject(data, userID, responder){
         pg.connect(conString, function(err, client, done){  
-            admins = [userID, 1]
+            admins = userID + ', 1'
             client.query("insert into projects(uuid, projectname, admins, tags) values ($1, $2, $3, $4) returning uuid;", [uuid.v4(), data.projectname, admins, data.tags], function(err, result){
                 var DBresponse = result.rows[0].uuid;
                 var response = {
@@ -329,6 +329,33 @@ app.post('/api/createproject', function(req, res)
     
     checkAuth(POSTbody, checkProject, createProject, responder);
 });   
+
+app.post('/api/myprojects', function(req, res){
+     var POSTbody = req.body
+     console.log(POSTbody)
+
+     client.query("SELECT * FROM authtokens WHERE auth=$1", [POSTbody.auth], function(err, result){
+        if (result.rowCount === 0) { 
+            response = {'message' : 'invalid token'}
+            var status = "500"
+            res.status(status).send(response) 
+        } else {     
+            var userID = result.rows[0].userid
+            client.query("SELECT * FROM projects", function(err, result){
+                var results = result.rows[1].admins;
+                console.log(results)
+                res.status(200).send('ok')
+            });        
+                                 
+        }
+    });
+
+}); 
+
+app.post('/api/myusers/:projectname', function(req, res){
+    var POSTbody = req.body
+    var projectName = req.params.projectname
+});
 
 app.post('/api/useauth', function(req, res)
 {
