@@ -76,29 +76,28 @@
     console.log('{{{ url }}}')
 
     $('#adminLogin').on('click', function(){ 
-        var url = domain + 'api/login';
+        var url = domain + 'api/admin/login';
         var data = {
             username: $('#adminUsername').val(),
             password: $('#adminPassword').val(),
         };
-        request(data, url);        
+        request('POST', data, url);        
     });
 
      $('#adminRegister').on('click', function(){ 
-        var url = domain + 'api/register';
+        var url = domain + 'api/admin/register';
         var data = {
             username: $('#adminUsername').val(),
             password: $('#adminPassword').val(),
             tags: ""
         };
-        request(data, url);        
+        request('POST', data, url);        
     });
     $('#adminChecktoken').on('click', function(){ 
-        var url = domain + 'api/useauth';
-        var data = {
-            auth: $('#adminToken').val()
-        };
-        request(data, url);        
+        var url = domain + 'api/auth';
+        var data = {}
+        var head = String($('#adminToken').val())
+        request('GET', data, url, head);        
     });
 </script>
 
@@ -124,12 +123,12 @@
     console.log('{{{ url }}}')
 
     $('#projectCreate').on('click', function(){ 
-        var url = domain + 'api/createproject';
+        var url = domain + 'api/admin/newproject';
         var data = {
             projectname: $('#projectName').val(),
             auth: $('#projectAdminToken').val()
         };
-        request(data, url);        
+        request('POST', data, url);        
     });
 </script>
 
@@ -164,7 +163,7 @@
             username: $('#userUsername').val(),
             password: $('#userPassword').val(),
         };
-        request(data, url);        
+        request('POST', data, url);        
     });
 
      $('#userRegister').on('click', function(){ 
@@ -175,7 +174,7 @@
             password: $('#userPassword').val(),
             tags: ""
         };
-        request(data, url);        
+        request('POST', data, url);        
     });
 </script>
 
@@ -200,11 +199,11 @@
 
     $('#findMyProjects').on('click', function(){ 
         var projectname = $('#myProjectAuth').val()
-        var url = domain + 'api/myprojects';
+        var url = domain + 'api/admin/projects';
         var data = {
             auth: $('#myProjectAuth').val()
         };
-        request(data, url);        
+        request('POST', data, url);        
     });
 
 </script>
@@ -231,21 +230,46 @@
     
 
     $('#findMyUsers').on('click', function(){ 
-        var url = domain + 'api/myusers';
+        var url = domain + 'api/admin/projectusers';
         var data = {
             UUID: $('#myUsersUUID').val(),
             auth: $('#myUsersAuth').val()
         };
-        request(data, url);        
+        request('POST', data, url);        
+    });
+
+</script>
+
+<!--------------------------------->
+<!-- My Userd ---->
+
+<div>
+    
+    <button id="testr">Find Projects</button>
+</div>
+<br>
+<hr>
+
+
+<script>
+    var domain = '{{{ url }}}'
+    console.log('{{{ url }}}')
+    
+
+    $('#testr').on('click', function(){ 
+        var url = domain + 'api/admin/log';
+        var data = {};
+        request('POST', data, url, 'test');        
     });
 
 </script>
 
 
 <script>    
-    function request(data, url){
+    function request(type, data, url, auth){
         $.ajax({		
-            type: 'POST',
+            type: type,
+            headers: {'X-AUTH-TOKEN' : auth},
             url: url,        
             crossDomain: true,
             data: JSON.stringify(data),

@@ -54,7 +54,7 @@ app.get('/', function(req, res){
 });
 
 
-app.post('/api/:projectname/login', function(req, res){
+app.post('/api/login/:projectname', function(req, res){
     var POSTbody = req.body
     var projectName = req.params.projectname
 
@@ -119,7 +119,7 @@ app.post('/api/:projectname/login', function(req, res){
     loginUser(POSTbody, projectName, passwordTester, responder);   
 });
 
-app.post('/api/:projectname/register', function(req, res){
+app.post('/api/register/:projectname', function(req, res){
     var POSTbody = req.body
     var projectName = req.params.projectname
 
@@ -178,7 +178,7 @@ app.post('/api/:projectname/register', function(req, res){
 });
 
 //Admin login endpoint
-app.post('/api/login', function(req, res)
+app.post('/api/admin/login', function(req, res)
 {
     var POSTbody = req.body
 
@@ -225,7 +225,7 @@ app.post('/api/login', function(req, res)
 
 
 
-app.post('/api/register', function(req, res)
+app.post('/api/admin/register', function(req, res)
 {    
     var POSTbody = req.body
 
@@ -270,7 +270,7 @@ app.post('/api/register', function(req, res)
 });   
 
 
-app.post('/api/createproject', function(req, res)
+app.post('/api/admin/newproject', function(req, res)
 {    
     var POSTbody = req.body
 
@@ -333,7 +333,7 @@ app.post('/api/createproject', function(req, res)
     checkAuth(POSTbody, checkProject, createProject, responder);
 });   
 
-app.post('/api/myprojects', function(req, res){
+app.post('/api/admin/projects', function(req, res){
      var POSTbody = req.body
      var projects = []
 
@@ -379,7 +379,7 @@ app.post('/api/myprojects', function(req, res){
 
 }); 
 
-app.post('/api/myusers', function(req, res){
+app.post('/api/admin/projectusers', function(req, res){
     var POSTbody = req.body;
 
     //is the auth token valid?
@@ -425,11 +425,11 @@ app.post('/api/myusers', function(req, res){
     //fetch all users for that project SELECT * FROM useraccounts WHERE project='projectID' 
 });
 
-app.post('/api/useauth', function(req, res)
-{
-    var POSTbody = req.body
+app.get('/api/auth', function(req, res)
+{    
+    var data = req.headers['x-auth-token']
     function checkAuth(data, responder){      
-        client.query("SELECT * FROM authtokens WHERE auth=$1", [data.auth], function(err, result){
+        client.query("SELECT * FROM authtokens WHERE auth=$1", [data], function(err, result){
             if (result.rowCount === 0) { 
                 response = {'message' : 'invalid token'}
                 var status = "500"
@@ -448,31 +448,69 @@ app.post('/api/useauth', function(req, res)
         res.status(status).send(response)
     }
 
-    checkAuth(POSTbody, responder)
+    checkAuth(data, responder)
 }); 
 
+app.post('/api/admin/banuser', function(req, res){
+    //POST data - admin auth, project UUID, user UUID
+
+    //check if auth is correct
+    //check if admin has authority of project
+    //check if user exsists
+    //delete user's exsisting auth tokens
+    //add user to ban table
+});
+
+app.post('/api/admin/unbanuser', function(req, res){
+    //POST data - admin auth, user UUID
+
+    //check if auth is correct
+    //find user's project
+    //check if admin has authority of project
+    //delete user ban entry
+});
+
+app.post('/api/admin/deleteuser', function(req, res){
+    //POST data - admin auth, project UUID, user UUID
+
+    //check if auth is correct
+    //check if admin has authority of project
+    //check if user exsists
+    //delete user's exsisting auth tokens
+    //delete user
+});
+
+app.post('/api/admin/log', function(req, res){
+    //POST data - admin auth, project UUID, log data
+
+    //check if auth is correct
+    //check if admin has authority of project
+    //add entry to log
+    console.log(req.headers["x-auth-token"]);
+    res.status(200).send(req.headers)
+});
 
 
 
 //go through database at midnight and remove auth tokens that have expired
 var chronos_the_father_of_time = schedule.scheduleJob({hour: 00, minute: 00}, function(){
-    scythe();
+   function scythe(){
+        client.query("SELECT * FROM authtokens", function(err, result){
+            var authList = result.rows
+            for (i = 0; i < authList.length; i++) { 
+                var dbCursor = authList[i].id
+                var expirationDate = authList[i].expire - 1
+                if (expirationDate < 0){
+                    client.query("DELETE FROM authtokens WHERE id=$1", [dbCursor], function(err, result){});
+                } else {
+                    client.query("UPDATE authtokens SET expire=$1 WHERE id=$2", [expirationDate, dbCursor], function(err, result){});
+                }
+            }
+        });
+    }
+   
+   scythe();
 });
-
-function scythe(){
-    client.query("SELECT * FROM authtokens", function(err, result){
-       var authList = result.rows
-       for (i = 0; i < authList.length; i++) { 
-           var dbCursor = authList[i].id
-           var expirationDate = authList[i].expire - 1
-           if (expirationDate < 0){
-               client.query("DELETE FROM authtokens WHERE id=$1", [dbCursor], function(err, result){});
-           } else {
-               client.query("UPDATE authtokens SET expire=$1 WHERE id=$2", [expirationDate, dbCursor], function(err, result){});
-           }
-       }
-    });
-}
 
 var serve = function(){
     app.listen(PORT);
