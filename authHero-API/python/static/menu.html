@@ -1,0 +1,36 @@
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href='http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="serve.js"></script>
+</head> 
+<script>
+    $( document ).ready(function() {
+  	    loadMenu();
+    });
+</script>
+<style>
+    .button{
+        color: gray; border: solid 1px gray; text-align: center; height:40px; line-height: 40px; font-size: 20px; border-radius:2px
+    } 
+    .button:hover{
+        background-color: rgba(0,0,0,0.03)
+    } 
+    .button:active{
+        background-color: rgba(0,0,0,0.08)
+    } 
+</style>   
+<body style="background-color: #eeeeee; font-family: 'Roboto', sans-serif;">
+    <div style="position:fixed; top: 0; bottom: 0; left: 0; right: 0; height:50px; background-color: black">
+        <div style="position:absolute; top: 5px; left: 0px; right: 0px; text-align: center; font-size:30px; color: white">menuME</div>
+    </div>
+    <div style="position:fixed; top: 50%; margin-top: -100px; right: -5px; border-radius: 4px; height: 200px; width: 50px; background-color: gray">
+        <a href="#" onclick="saveMenu()">
+            <div class="ion-compose" style="position: absolute; top: 10px; left: 0; right: 0; color: white; text-align: center; font-size: 40px"></div>
+        </a>    
+    </div>
+    <div style="position:fixed; top: 50px; bottom: 0; left: 15%; right: 15%; background-color: white">
+        <textarea id="textArea" style="position: absolute; left: 0; width:100%; top: 0; min-height:100%;"></textarea>
+    </div>
+
+</body>

@@ -1,0 +1,36 @@
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="serve.js"></script>
+</head> 
+<style>
+    .button{
+        color: gray; border: solid 1px gray; text-align: center; height:40px; line-height: 40px; font-size: 20px; border-radius:2px
+    } 
+    .button:hover{
+        background-color: rgba(0,0,0,0.03)
+    } 
+    .button:active{
+        background-color: rgba(0,0,0,0.08)
+    } 
+</style>   
+<body style="font-family: 'Roboto', sans-serif;">
+    <div style="background-image: url('food.jpg'); background-position: center; background-size: cover; position: absolute; top: 0; bottom: 0; left: 0; right: 0; opacity: 0.9"></div>
+    <div style="height:250px; width:500px; position:absolute; left:50%; top: 50%; margin-left: -250px; margin-top:-125px;background-color: rgba(255,255,255,0.9); border-radius: 20px; ">
+        <div style="position:absolute; top: 12px; left: 0px; right: 0px; text-align: center; font-size:30px; color: gray">menuME</div>
+        
+        <input id="username" value="user" type="text" style="position:absolute; top: 70px; left: 20px; width: calc(100% - 40px); height:40px; font-size: 25px; text-align: center" placeholder="Username">
+        <input id="password" value="password" type="text" style="position:absolute; top: 120px; left: 20px; width: calc(100% - 40px); height:40px; font-size: 25px; text-align: center" placeholder="Password">
+        
+        <a href="#" onclick="registerAccount()">
+            <div class="button" style="position:absolute; bottom: 20px; left: 20px; width: calc(50% - 30px); ">
+                Register
+            </div>
+        </a>
+        <a href="#" onclick="loginAccount()">
+            <div class="button" style="position:absolute; bottom: 20px; right: 20px; width: calc(50% - 30px);">
+                Login
+            </div>
+        </a>
+    </div>
+</body>
