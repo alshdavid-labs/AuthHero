@@ -42,8 +42,7 @@ def login():
 @cross_origin()
 def project():
     data = request.get_json()
-    auth = request.headers['x-auth']
-    
+    auth = request.headers['x-auth']    
     return jsonify(projects.createProject(data, auth))
 
 
@@ -53,13 +52,15 @@ def project():
 @app.route("/u/<projectName>/register", methods=['POST'])
 @cross_origin()
 def projectRegister(projectName):
-    return projectName 
+    data = request.get_json()
+    return jsonify(projects.createUser(data, projectName)) 
 
 #login user to a project
 @app.route("/u/<projectName>/login", methods=['POST'])
 @cross_origin()
 def projectLogin(projectName):
-    return projectName 
+    data = request.get_json()
+    return jsonify(projects.loginUser(data, projectName))
  
 
 if __name__ == "__main__":
