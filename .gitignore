@@ -1,2 +1,3 @@
 #ignore IDE dir
 .vscode
+authHero-API/node_modules
