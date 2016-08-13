@@ -45,9 +45,6 @@ def project():
     auth = request.headers['x-auth']    
     return jsonify(projects.createProject(data, auth))
 
-
-
-
 #register user for a project
 @app.route("/u/<projectName>/register", methods=['POST'])
 @cross_origin()
