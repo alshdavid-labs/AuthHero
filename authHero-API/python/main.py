@@ -5,8 +5,8 @@ import threading
 
 import lib.users
 users = lib.users
-import lib.menus
-menus = lib.menus
+import lib.projects
+projects = lib.projects
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -41,7 +41,13 @@ def login():
 @app.route("/a/project", methods=['POST'])
 @cross_origin()
 def project():
-    return 'soon'  
+    data = request.get_json()
+    auth = request.headers['x-auth']
+    
+    return jsonify(projects.createProject(data, auth))
+
+
+
 
 #register user for a project
 @app.route("/u/<projectName>/register", methods=['POST'])
@@ -54,17 +60,7 @@ def projectRegister(projectName):
 @cross_origin()
 def projectLogin(projectName):
     return projectName 
-
-
-@app.route("/menu/<username>", methods=['GET', 'PUT'])
-@cross_origin()
-def menu(username):
-    if request.method == 'PUT':
-        data = str(request.get_json())
-        auth = request.headers['Auth']        
-        return jsonify(menus.setMenu(data, auth, username)) 
-    if request.method == 'GET':
-        return jsonify(menus.getMenu(username))     
+ 
 
 if __name__ == "__main__":
     app.run()

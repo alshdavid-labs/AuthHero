@@ -4,7 +4,7 @@ db = sqlite3.connect("database.db")
 
 def checkAuth(auth):
     cursor = db.cursor()
-    cursor.execute('SELECT * FROM auth WHERE auth=?', (auth,))
+    cursor.execute('SELECT * FROM authtokens WHERE token=?', (auth,))
     db.commit()
     response = cursor.fetchall()    
     if len(response) == 0:
@@ -51,7 +51,12 @@ def getAdmin(username):
         return 0                 
     return { "username" : response[0][2], "interal_id" : response[0][0], "external_id": response[0][1] } # Return User object 
 
-
-     
+def createProject(projectname, ID):
+    UUIDstr = str(uuid.uuid4())
+    cursor = db.cursor()
+    cursor.execute('INSERT INTO projects (uuid, projectname) VALUES(?, ?)', (UUIDstr, projectname))
+    cursor.execute('INSERT INTO adminKey (id, project) VALUES(?, ?)', (ID, projectname))
+    db.commit()
+    return
 
     
