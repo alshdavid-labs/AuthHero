@@ -3,16 +3,12 @@ database = lib.db
 
 
 # Check auth token
-def validAuth(data):
-    if checkInput("auth", data) == False:
-        message = { "message" : "Invalid JSON" }
-        return message   
-    auth = data[0]['auth']
-    if checkAuth(auth) == False:
-        message = { "message" : "Invalid auth token" }
-        return message 
-    message = { "message" : "Valid auth token" }
-    return message  
+def checkAuth(auth):
+    if auth == "":
+        return { "message" : "Invalid Auth Token" }   
+    if database.checkAuth(auth) == 0:
+        return { "message" : "Invalid Auth Token" } 
+    return { "message" : "Valid Auth Token" }  
 
 # Register User
 def adminRegistration(data):
@@ -93,9 +89,7 @@ def registerAdmin(username, password):
 
 def loginAdmin(username):    
     return database.loginAdmin(username)
-
-def checkAuth(auth):    
-    return database.checkAuth(auth)    
+   
 
        
 

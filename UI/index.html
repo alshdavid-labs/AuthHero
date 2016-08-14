@@ -1,0 +1,245 @@
+<script src="https://code.jquery.com/jquery-3.0.0.min.js" integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0=" crossorigin="anonymous"></script>
+<link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+<style>
+    block{
+        display: inline-block;        
+        padding:5px;       
+        font-weight:400;
+        font-family: 'Inconsolata';
+        margin:5px;
+        line-height: 15px;
+        background: rgba(255,0,0,0.1);
+        color:red;
+        border:1px red solid;
+        text-align: center;        
+    }
+
+    .blue{
+        background: rgba(0,0,255,0.1);
+        color:blue;
+        border:1px blue solid;
+        width:90px;
+    }
+
+    .green{
+        background: rgba(0,255,0,0.1);
+        color:green;
+        border:1px green solid;
+    }
+
+    block span{
+        color:gray;
+        font-weight:700
+    }
+</style>
+
+<!-- Admin Login /  Registration -->
+<div>
+    <a href="#gui"><div style="position: fixed; top: 10px; right: 10px; background-color:white"><u>API GUI \/</u></div></a>
+    <div>
+        <div style="font-size:30px"><u>authHero:</u></div><br>
+        This is a user account management RESTful API, designed to make it easier for developers to quickly 
+        put together a service and not worry about authentication, user management, logging or statistics generation.
+        <br><br>
+        API Overview:<br>
+        You create an admin account, use that admin account to create a "project",
+        you then sign users up using that project's endpoint.
+        <br><br>
+        User account names must be unique within thier project, project names must be globally unique.
+        <br><br>
+        authHero will return an auth token on a login, which you can use internally within your service, or you can consume the action end point to utilise authHero's action logging system 
+        <br><br>
+        You can create, ban, delete, modify, track/log,
+        <br><br><hr><br>
+        <u>Admin Endpoints:</u><br>
+        <br>
+        Login:<br>
+        <block class="blue">End-Point</block> <block>/a/login</block> <block class="green">POST</block> <br>
+        <block class="blue">Headers</block> <block>Content-Type : application/json</block><br>
+        <block class="blue">Payload</block> <block>[ { "username" : "<span>string</span>", "password" : "<span>string</span>" } ]</block><br><br>
+        Registration:<br>
+        <block class="blue">End-Point</block> <block>/a/register</block> <block class="green">POST</block> <br>
+        <block class="blue">Headers</block> <block>Content-Type : application/json</block><br>
+        <block class="blue">Payload</block> <block>[ { "username" : "<span>string</span>", "password" : "<span>string</span>" } ]</block><br><br>
+        Create Project:<br>
+        <block class="blue">End-Point</block> <block>/a/project</block> <block class="green">POST</block> <br>
+        <block class="blue">Headers</block> <block>Content-Type : application/json</block> <block>x-auth : <span>UUID</span></block><br>
+        <block class="blue">Payload</block> <block>[ { "projectname" : "<span>string</span>" } ]</block><br><br>
+        <br>
+        <u>User Endpoints:</u><br>
+        <br>
+        Login:<br>
+        <block class="blue">End-Point</block> <block>/a/<span>projectName</span>/login</block> <block class="green">POST</block> <br>
+        <block class="blue">Headers</block> <block>Content-Type : application/json</block><br>
+        <block class="blue">Payload</block> <block>[ { "username" : "<span>string</span>", "password" : "<span>string</span>" } ]</block><br><br>
+        Registration:<br>
+        <block class="blue">End-Point</block> <block>/a/<span>projectName</span>/register</block> <block class="green">POST</block> <br>
+        <block class="blue">Headers</block> <block>Content-Type : application/json</block><br>
+        <block class="blue">Payload</block> <block>[ { "username" : "<span>string</span>", "password" : "<span>string</span>" } ]</block><br><br>
+        <br>
+        <br>
+        <u>General Endpoints:</u><br>
+        <br>
+        Action:<br>
+        <block class="blue">End-Point</block> <block>/a/auth</block> <block class="green">POST</block> <br>
+        <block class="blue">Headers</block> <block>Content-Type : application/json</block> <block>x-auth : <span>UUID</span></block><br>
+        <block class="blue">Payload</block> <block><span>none</span></block><br><br>
+        <br><br><br><br>
+    </div>
+    <hr>
+    <div id="gui" style="font-size:30px; margin: 30px 0px 30px 0px;">Basic Interface for API</div>
+    <hr>
+    <p><u>Auth Actioner:</u></p>
+    <input id="adminToken" type="text" name="token">
+    <br><br>
+    <button id="checktoken">Action</button>
+    <br><br>
+</div>
+
+<div>
+    <hr>
+    <p><u>Admin Login/Registration:</u></p>
+    <p>Username:</p>
+    <input id="adminUsername" type="text" name="name" value="User">
+    <p>Password:</p>
+    <input id="adminPassword" type="text" value="Password">
+    </br><br>
+    <button id="adminLogin">Login</button>
+    <button id="adminRegister">Register</button>
+</div>
+<br>
+<hr>
+
+
+<script>
+    var domain = 'http://127.0.0.1:5000/'
+
+    $('#adminLogin').on('click', function(){ 
+        var url = domain + 'a/login';
+        var data = [{
+            username: $('#adminUsername').val(),
+            password: $('#adminPassword').val(),
+        }];
+        request('POST', data, url);        
+    });
+
+     $('#adminRegister').on('click', function(){ 
+        var url = domain + 'a/register';
+        var data = [{
+            username: $('#adminUsername').val(),
+            password: $('#adminPassword').val(),
+            tags: ""
+        }];
+        request('POST', data, url);        
+    });
+    $('#checktoken').on('click', function(){ 
+        var url = domain + 'auth';
+        var head = String($('#adminToken').val())
+        request('GET', null, url, head);        
+    });
+</script>
+
+<!--------------------------------->
+<!----- Admin Create Project ------>
+
+<div>
+    <p><u>Admin Create Project:</u></p>
+    <p>Project Name:</p>
+    <input id="projectName" type="text" name="name" value="ProjectName">
+    </br>
+    <p>Auth Token:</p>
+    <input id="projectAdminToken" type="text" name="token">
+    <br><br>
+    <button id="projectCreate">Create Project</button>
+    <br><br>
+    <hr>
+</div>  
+
+
+<script>
+    $('#projectCreate').on('click', function(){ 
+        var url = domain + 'a/project';
+        var data = [{
+            projectname: $('#projectName').val()            
+        }];
+        var head = $('#projectAdminToken').val()
+        request('POST', data, url, head);        
+    });
+</script>
+
+<!--------------------------------->
+<!-- User Registration / Login ---->
+
+<div>
+    <p><u>User Login/Registration:</u></p>
+    <p>Project Name:</p>
+    <input id="userProjectname" type="text" name="name" value="ProjectName">
+    <p>Username:</p>
+    <input id="userUsername" type="text" name="name" value="User">
+    <p>Password:</p>
+    <input id="userPassword" type="text" value="Password">
+    </br><br>
+    <button id="userLogin">Login</button>
+    <button id="userRegister">Register</button>
+</div>
+<br>
+<hr>
+
+
+<script>
+    $('#userLogin').on('click', function(){ 
+        var projectname = $('#userProjectname').val()
+        var url = domain + 'api/' + projectname + '/login';
+        var data = {
+            username: $('#userUsername').val(),
+            password: $('#userPassword').val(),
+        };
+        request('POST', data, url);        
+    });
+
+     $('#userRegister').on('click', function(){ 
+        var projectname = $('#userProjectname').val()
+        var url = domain + 'api/' + projectname + '/register';
+        var data = {
+            username: $('#userUsername').val(),
+            password: $('#userPassword').val(),
+            tags: ""
+        };
+        request('POST', data, url);        
+    });
+</script>
+
+
+<script>    
+    function request(type, data, url, auth){
+        switch (type){
+            case "GET":
+                $.ajax({		
+                    type: type,
+                    headers: {'x-auth' : auth},
+                    url: url,        
+                    crossDomain: true,
+                    //data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: "application/json",
+                    success: function(data) {console.log(data);},
+                    error: function(data) {console.log(data);}        
+                });
+            break;
+
+            case "POST":
+                $.ajax({		
+                    type: type,
+                    headers: {'x-auth' : auth},
+                    url: url,        
+                    crossDomain: true,
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    contentType: "application/json",
+                    success: function(data) {console.log(data);},
+                    error: function(data) {console.log(data);}        
+                });
+            break;    
+    }
+    } 
+</script>

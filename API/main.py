@@ -20,10 +20,14 @@ def root():
     return "<body style='margin:50px; text-align: center'><p>The authHero API</p><br><p>Go to authHero.com for usage instructions</p></body>"
 
 #test if auth token is registered
-@app.route("/auth", methods=['POST'])
+@app.route("/auth", methods=['GET'])
 @cross_origin()
 def auth():
-    return jsonify(users.checkAuth(request.get_json())) 
+    try:
+        auth = request.headers['x-auth']
+    except:
+         return jsonify({ "message" : "No Auth Header"})
+    return jsonify(users.checkAuth(auth)) 
 
 #register admin account
 @app.route("/a/register", methods=['POST'])

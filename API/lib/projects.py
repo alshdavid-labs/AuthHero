@@ -5,7 +5,7 @@ import lib.users
 users = lib.users
 
 def createProject(data, auth):
-    ID = users.checkAuth(auth)
+    ID = database.checkAuth(auth)
     if ID == 0:
         return { "message" : "Invalid auth token" } 
 
