@@ -31,11 +31,50 @@
         color:gray;
         font-weight:700
     }
+    
+    responder{
+        display: inline-block;
+        opacity:0;        
+        padding:15px;
+        border-radius:3px;       
+        font-weight:400;
+        font-family: 'Inconsolata';
+        position: fixed;
+        bottom:20px;
+        font-size:20px;
+        left:50%;
+        transform: translateX(-50%);
+        background: green;
+    }
+
+    responder.success{
+        background: green;
+    }
+
+    responder.error{
+        background: red;
+    }
+
+    responder.animate{
+        animation-name: res;
+        animation-duration: 4s;
+    }
+
+    @keyframes res {
+        0% {opacity: 0; display: none;}
+        1% {opacity: 0; display:inline-block}
+        11% {opacity: 1; display:inline-block}
+        89% {opacity: 1; display:inline-block}
+        99% {opacity: 0; display:inline-block} 
+        0% {opacity: 0; display: none;}
+    }
+
 </style>
 
 <!-- Admin Login /  Registration -->
 <div>
     <a href="#gui"><div style="position: fixed; top: 10px; right: 10px; background-color:white"><u>API GUI \/</u></div></a>
+    <responder class="">asdasd</responder>
     <div>
         <div style="font-size:30px"><u>authHero:</u></div><br>
         This is a user account management RESTful API, designed to make it easier for developers to quickly 
@@ -222,11 +261,16 @@
                     //data: JSON.stringify(data),
                     dataType: 'json',
                     contentType: "application/json",
-                    success: function(data) {console.log(data);},
-                    error: function(data) {console.log(data);}        
+                    success: function(data) {
+                        console.log(data);
+                        responder(data.message, "success");
+                    },
+                    error: function(data) {
+                        console.log(data);
+                        responder(data.message, "error");
+                    }        
                 });
             break;
-
             case "POST":
                 $.ajax({		
                     type: type,
@@ -236,10 +280,28 @@
                     data: JSON.stringify(data),
                     dataType: 'json',
                     contentType: "application/json",
-                    success: function(data) {console.log(data);},
-                    error: function(data) {console.log(data);}        
+                    success: function(data) {
+                        responder(data.message, "success"); 
+                        console.log(data);
+                    },
+                    error: function(data) {
+                        console.log(data);
+                        responder(data.message, "error");
+                    }        
                 });
             break;    
-    }
+        }
     } 
+
+    function responder(message, type){
+        console.log('um?')
+        $('responder').html(message)
+        $('responder').addClass(type);
+        $('responder').addClass('animate');
+        setTimeout(function(){
+            $('responder').removeClass('animate');
+            $('responder').removeClass(type);
+        }, 4000);
+        
+    }
 </script>
