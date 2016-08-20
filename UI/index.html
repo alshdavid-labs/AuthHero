@@ -228,22 +228,21 @@
 <script>
     $('#userLogin').on('click', function(){ 
         var projectname = $('#userProjectname').val()
-        var url = domain + 'api/' + projectname + '/login';
-        var data = {
+        var url = domain + 'u/' + projectname + '/login';
+        var data = [{
             username: $('#userUsername').val(),
             password: $('#userPassword').val(),
-        };
+        }];
         request('POST', data, url);        
     });
 
      $('#userRegister').on('click', function(){ 
         var projectname = $('#userProjectname').val()
-        var url = domain + 'api/' + projectname + '/register';
-        var data = {
+        var url = domain + 'u/' + projectname + '/register';
+        var data = [{
             username: $('#userUsername').val(),
-            password: $('#userPassword').val(),
-            tags: ""
-        };
+            password: $('#userPassword').val()
+        }];
         request('POST', data, url);        
     });
 </script>
